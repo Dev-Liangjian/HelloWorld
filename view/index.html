@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-cn">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<title>首页</title>
+	<meta name="keywords" content="关键字列表" />
+	<meta name="description" content="网页描述" />
+	<link rel="stylesheet" type="text/css" href="<?php echo DIR_PUBLIC; ?>/css/public.css" />
+	<link rel="stylesheet" type="text/css" href="<?php echo DIR_PUBLIC; ?>/css/index.css" />
+	<style type="text/css"></style>
+	<script type="text/javascript"></script>
+</head>
+<body>
+	<!-- 页眉 -->
+	<div class="header_wrap">
+		<div id="header" class="auto">
+			<div class="logo">BBS</div>
+			<div class="nav">
+				<a class="hover" href="">首页</a>
+			</div>
+			<div class="serarch">
+				<form action="./model/list_son.php" method="get">
+					<input class="keyword" type="text" name="keyword" placeholder="搜索其实很简单" />
+					<input class="submit" type="submit" value="" />
+				</form>
+			</div>
+			<div class="login">
+			<?php
+				if( isset($_SESSION['userLoginInfo']) ){
+					echo '<a href="./model/userinfo.php">'. $_SESSION['userLoginInfo']['user_name'] . '</a>' . '&nbsp;&nbsp;';
+					echo '<a href="./model/logout.php">注销</a>&nbsp;';
+				}else{
+					echo '<a href="./model/login.php">登录</a>&nbsp;&nbsp;';
+					echo '<a href="./model/register.php">注册</a>';
+				}
+			?>
+			</div>
+		</div>
+	</div>
+
+	<div style="margin-top:55px;"></div>
+
+	<?php while ( $row = mysqli_fetch_assoc($result) ) : ?>
+	<div class="box auto">
+		<div class="title">
+			<a href="./model/list_father.php?category_id=<?=$row['category_id']?>"> <?= $row['category_name'] ?></a>
+		</div>
+
+		<div class="classList">
+			<?php  //遍历category的同时在note表中提取当前栏目的帖子信息
+				$noteSql = "SELECT `note_id`,`note_title`,`note_owner`,`note_hits` FROM `note` 
+							WHERE `note_category_id` = {$row['category_id']} 
+							ORDER BY `note_hits` DESC LIMIT 6;";
+				$noteResult = mysqli_query($link,$noteSql);
+				while( $noteRow = mysqli_fetch_assoc($noteResult) ) :
+			 ?>
+			<div class="childBox new">
+			<h2> <a href="./model/show.php?note_id=<?=$noteRow['note_id']?>">帖子标题:<?=$noteRow['note_title']?> </a> </h2>
+			点击量:<?=$noteRow['note_hits']?><br/>
+			<span>楼主:<?=$noteRow['note_owner']?></span>
+			</div>
+			<?php endwhile; ?>
+			<div style="clear:both;"></div>
+		</div>
+
+	</div>
+	<?php endwhile ; ?>
+
+	<!-- 页脚 -->
+	<div id="footer" class="auto">
+		<div class="bottom">
+			<a>Dev_liang</a>
+		</div>
+		<div class="copyright">Powered by Dev_liang ©2018 blog.csdn.net/qq_34804120</div>
+	</div>
+</body>
+</html>

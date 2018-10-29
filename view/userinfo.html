@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>用户个人信息</title>
+	<meta charset="utf-8">
+
+	<link rel="stylesheet" type="text/css" href="<?php echo DIR_PUBLIC; ?>/css/userinfo.css">
+</head>
+<body>
+<!-- 	<form action="./changeuserinfo.php" method="post" class="bootstrap-frm" enctype="multipart/form-data">
+	<h1>用户个人信息编辑
+	<span>请填写所有字段中的文字</span>
+	</h1>
+	<label>
+	<span>用户名:</span>
+	<input id="name" type="text" name="name" placeholder="<?=$user_name?>" disabled="disabled" />
+	</label>
+	性别
+	<label>
+		<span>性别:</span>
+		<select name="userinfo_sex">
+		<option value="man" <?php if($row['userinfo_sex'] == 'man') echo 'selected="selected"';?> >男</option>
+		<option value="woman" <?php if($row['userinfo_sex'] == 'woman') echo 'selected="selected"';?> >女</option>
+		<option value="secret" <?php if($row['userinfo_sex'] == 'secret') echo 'selected="selected"';?> >保密</option>
+		</select>
+	</label>
+	联系邮箱
+	<label>
+	<span>你的Email:</span>
+	<input id="email" type="email" name="email" value="<?=$row['userinfo_email']?>" />
+	</label> 
+	地区
+        <label>
+		<span>所在地区:</span> 
+        <select class="region" name="userinfo_region_province" id="province" onchange="getStationName()">
+    		<option value="0">请选择省份</option> 
+    		<option <?php if( $province == '广东' ) echo 'selected="selected"';?> >广东</option>
+    		<option <?php if( $province == '北京' ) echo 'selected="selected"';?> >北京</option>
+    		在此处写所有省份列表
+    	</select>
+        <select class="region" name="userinfo_region_city" id="city">
+            <option value="0">请选择城市</option> 
+            <?php echo "<option selected='selected'>{$city}</option>"; ?>
+        </select>
+        </label>
+	所属行业
+	<label>
+		<span>熟悉领域:</span>
+		<input id="name" type="text" name="userinfo_industry" value="<?=$row['userinfo_industry']?>" />
+	</label>
+	<label>
+	<span>个人简述:</span>
+	<textarea id="message" maxlength="300" name="userinfo_text" ><?=$row['userinfo_text']?></textarea>
+	</label>
+
+	<label>
+	<span>&nbsp;</span>
+	<input type="submit" class="button" value="提交" />
+	</label>
+</form> -->
+	<form enctype="multipart/form-data" action="./userinfo_deal.php" method="post" class="bootstrap-frm">
+		<label>
+			<span>原头像:</span>
+			<img width="70%"  src="../uploads/images/<?=$row['userinfo_image']?>">
+		</label>
+		
+		<label>
+			<span>更换头像:</span>
+			<input type="file" value="<?=$row['userinfo_image']?>" name="userinfoImage">
+		</label>
+		<label>
+		<span>&nbsp;</span>
+		<input type="submit" class="button" value="修改头像" />
+		</label>
+	</form>
+</body>
+
+	<script type="text/javascript">
+		var province = ["广东", "北京"]; 
+		var city = [
+		    ["广州","深圳","江门","东莞","珠海"],
+		    ["东城区","西城区","崇文区","宣武区","朝阳区","海淀区","丰台区"]
+		];
+
+		function getStationName() {
+		    var provinceEle = document.getElementById("province");
+		    var cityEle = document.getElementById("city");
+		    var lineStation = city[provinceEle.selectedIndex - 1];
+		    cityEle.length = 1;
+		    for (var i = 0; i < lineStation.length; i++) {
+		        cityEle[i + 1] = new Option(lineStation[i], lineStation[i]);
+		    }
+		} //为城市选择框根据省份选择框的值动态添加选项
+	</script>
+</html>

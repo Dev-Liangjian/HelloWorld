@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-cn">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<title>帖子列表页</title>
+	<meta name="keywords" content="关键字列表" />
+	<meta name="description" content="网页描述" />
+	<link rel="stylesheet" type="text/css" href="<?php echo DIR_PUBLIC?>/css/public.css" />
+	<link rel="stylesheet" type="text/css" href="<?php echo DIR_PUBLIC?>/css/list.css" />
+</head>
+<body>
+	<div class="header_wrap">
+		<div id="header" class="auto">
+			<div class="logo">BBS</div>
+			<div class="nav">
+				<a class="hover" href="/">首页</a>
+			</div>
+			<div class="serarch">
+				<form>
+					<input class="keyword" type="text" name="keyword" placeholder="搜索其实很简单" />
+					<input class="submit" type="submit" value="" />
+				</form>
+			</div>
+			<div class="login">
+			<?php
+				if( isset($_SESSION['userLoginInfo']) ){
+					echo '<a href="#">'. $_SESSION['userLoginInfo']['user_name'] . '</a>' . '&nbsp;&nbsp;';
+					echo '<a href="./logout.php">注销</a>&nbsp;';
+				}else{
+					echo '<a href="./login.php">登录</a>&nbsp;&nbsp;';
+					echo '<a href="./register.php">注册</a>';
+				}
+			?>
+			</div>
+		</div>
+	</div>
+	<div style="margin-top:55px;"></div>
+	<div id="main" class="auto">
+		<div id="left">
+			<div class="box_wrap">
+				<h3>包含 '<?=$keyword?>' 关键字的搜索结果如下:</h3>
+			</div>
+			<div style="clear:both;"></div>
+			<ul class="postsList">
+				<?php while( $row =  mysqli_fetch_assoc($result) ) : ?>
+				<?php
+					//遍历帖子并同时在reply表中提取最后回复时间以及回复数
+					$replySQL = "SELECT COUNT(*) AS reply_count, MAX(`reply_time`) AS last_reply_time 
+								FROM `reply` WHERE `reply_note_id` = {$row['note_id']};";
+					$replyResult = mysqli_query($link,$replySQL);
+					$replyRow = mysqli_fetch_assoc($replyResult);
+				?>
+				<li>
+					<div class="smallPic">
+						<a href="#">
+							<img width="45" height="45" src="../uploads/images/<?=$row['userinfo_image']?>">
+						</a>
+					</div>
+					<div class="subject">
+						<div class="titleWrap"><a href="#">[分类]</a>&nbsp;&nbsp;
+						<h2><a href="./show.php?note_id=<?php echo $row['note_id']; ?>">
+						<?php $html = "<span style='color:red';>$keyword</span>";
+						      $repalceText =  preg_replace("/{$keyword}/i", $html, $row['note_title']); 
+							  echo $repalceText; 
+						?>
+						<!-- <?php echo str_replace("$keyword","<span style='color:red';>$keyword</span>",$row['note_title']);?> -->
+						</a></h2>
+						</div>
+						<p>
+							楼主：<?php echo $row['note_owner']; ?>&nbsp;<?php echo date('Y-m-d H:i:s',$row['note_time']); ?>&nbsp;&nbsp;&nbsp;&nbsp;
+							最后回复：<?= (0==$replyRow['reply_count'])? '暂无' : date('Y-m-d H:i:s',$replyRow['last_reply_time']);?>
+						</p>
+					</div>
+					<div class="count">
+						<p>
+							回复<br /><span><?=$replyRow['reply_count'];?></span>
+						</p>
+						<p>
+							浏览<br /><span><?php echo $row['note_hits']; ?></span>
+						</p>
+					</div>
+					<div style="clear:both;"></div>
+				</li>
+				<?php endwhile ; ?>
+			</ul>
+			<div class="pages_wrap">
+				<a class="btn publish" href="./publish.php"></a>
+				<div class="pages">
+					<?php echo $strPage;?>
+				</div>
+				<div style="clear:both;"></div>
+			</div>
+		</div>
+		<div id="right">
+			<div class="classList">
+				<div class="title">版块列表</div>
+				<ul class="listWrap">
+					<li>
+						<h2><a href="#">NBA</a></h2>
+						<ul>
+							<li><h3><a href="#">乔丹</a></h3></li>
+							<li><h3><a href="#">科比</a></h3></li>
+							<li><h3><a href="#">库里</a></h3></li>
+						</ul>
+					</li>
+					<li>
+						<h2><a href="#">CBA</a></h2>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div style="clear:both;"></div>
+	</div>
+	<div id="footer" class="auto">
+		<div class="bottom">
+			<a>Dev_liang</a>
+		</div>
+		<div class="copyright">Powered by Dev_liang ©2018 blog.csdn.net/qq_34804120</div>
+	</div>
+</body>
+</html>

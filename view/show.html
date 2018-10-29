@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-cn">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<title>帖子详情页</title>
+	<meta name="keywords" content="关键字列表" />
+	<meta name="description" content="网页描述" />
+	<link rel="stylesheet" type="text/css" href="<?php echo DIR_PUBLIC?>/css/public.css" />
+	<link rel="stylesheet" type="text/css" href="<?php echo DIR_PUBLIC?>/css/show.css" />
+	<style type="text/css"></style>
+	<script type="text/javascript"></script>
+</head>
+<body>
+	<div class="header_wrap">
+		<div id="header" class="auto">
+			<div class="logo">BBS</div>
+			<div class="nav">
+				<a class="hover" href="/">首页</a>
+			</div>
+			<div class="serarch">
+				<form>
+					<input class="keyword" type="text" name="keyword" placeholder="搜索其实很简单" />
+					<input class="submit" type="submit" name="submit" value="" />
+				</form>
+			</div>
+			<div class="login">
+			<?php
+				if( isset($_SESSION['userLoginInfo']) ){
+					echo '<a href="#">'. $_SESSION['userLoginInfo']['user_name'] . '</a>' . '&nbsp;&nbsp;';
+					echo '<a href="./logout.php">注销</a>&nbsp;';
+				}else{
+					echo '<a href="./login.php">登录</a>&nbsp;&nbsp;';
+					echo '<a href="./register.php">注册</a>';
+				}
+			?>
+			</div>
+		</div>
+	</div>
+	<div style="margin-top:55px;"></div>
+	<div id="main" class="auto">
+		<div class="wrap1">
+			<div class="pages">
+				<?php echo $strPage; ?>
+			</div>
+			<a class="btn reply" href="./reply.php?note_id=<?php echo $row['note_id']; ?>"></a>
+			<div style="clear:both;"></div>
+		</div>
+		<!-- 楼主帖子详情 仅首页显示楼主的帖子-->
+		<?php if($currentPageNum == 1) : ?>
+		<div class="wrapContent">
+			<div class="left">
+				<div class="face">
+					<a target="_blank" href="">
+						<img width="160" src="../uploads/images/<?=$row['userinfo_image']?>" />
+					</a>
+				</div>
+				<div class="name">
+					<a href=""><?php echo $row['note_owner']; ?></a>
+				</div>
+			</div>
+			<div class="right">
+				<div class="title">
+					<h2><?php echo $row['note_title']; ?></h2>
+					<span>阅读：<?php echo $row['note_hits']; ?>&nbsp;|&nbsp;回复：<?=$ReplyCountRow[0];?></span>
+					<div style="clear:both;"></div>
+				</div>
+				<div class="pubdate">
+					<span class="date">发布于：<?php echo date('Y-m-d H:i:m',$row['note_time']); ?> </span>
+					<span class="floor" style="color:red;font-size:14px;font-weight:bold;">楼主</span>
+				</div>
+				<div class="content">
+					<?php echo $row['note_content']; ?>
+				</div>
+			</div>
+			<div style="clear:both;"></div>
+		</div>
+		<?php endif; ?>
+		<!-- 回帖详情 -->
+		<?php $i = 1+($currentPageNum-1)*$PerPageRecords; while( $row_reply =  mysqli_fetch_assoc($result_reply) ) : ?>
+		<div class="wrapContent">
+			<div class="left">
+				<div class="face">
+					<img width="140" src="../uploads/images/<?=$row_reply['userinfo_image']?>" />
+				</div>
+				<div class="name">
+					<?php echo $row_reply['reply_user']; ?>
+				</div>
+			</div>
+			<form action="./delreply_deal.php" method="post">
+			<div class="right">
+				<div class="pubdate">
+					<span class="date">回复时间：<?php echo date('Y-m-d H:i:s',$row_reply['reply_time']); ?></span>
+					<span class="floor"><?php echo $i++;?>楼&nbsp;|&nbsp;
+					<input type="submit" onclick="return confirmDel();" value="删除" 
+					<?php 
+						if( !isset($_SESSION['userLoginInfo']) )
+							echo 'disabled="disabled"';
+						else{
+							if( $_SESSION['userLoginInfo']['user_name'] 
+								!= $row_reply['reply_user'] )
+							echo 'disabled="disabled"';
+						}
+						?>  
+						/> &nbsp;|&nbsp;
+					<a href="./quote.php?reply_note_id=<?php echo $row['note_id']?>
+						&reply_id=<?php echo $row_reply['reply_id'];?>&reply_floor=<?php echo $i-1; ?>">引用</a>
+					</span>
+				</div>
+				<div class="content">
+					<!-- 引用回帖 -->
+					<?php
+						//提取被引用的回帖帖子信息
+ 						if($row_reply['reply_quote_id'] != 0){
+ 							$quoteSQL = "SELECT  * FROM `reply` WHERE `reply_id` = {$row_reply['reply_quote_id']};";
+ 							$quoteResult = mysqli_query($link,$quoteSQL);
+ 							$quoteRow = mysqli_fetch_assoc($quoteResult);
+ 						}
+					?>
+					<?php if($row_reply['reply_quote_id'] != 0) :?>
+						<div class="quote">
+						<h2>引用 <?=$row_reply['reply_floor']?>楼 <?=$quoteRow['reply_user']?>发表的: </h2>
+							<?=$quoteRow['reply_content']?>
+						</div>
+					<?php endif; ?>
+					<?php echo $row_reply['reply_content']; ?>
+					<input type="hidden" name="reply_id" value="<?php echo $row_reply['reply_id'];?>"> 
+					<input type="hidden" name="note_id" value="<?php echo $row['note_id'];?>">
+				</div>
+			</div>
+			</form>
+			<div style="clear:both;"></div>
+		</div>
+		<?php endwhile ; ?>
+
+		<div class="wrap1">
+			<div class="pages">
+				<?php echo $strPage; ?>
+			</div>
+			<a class="btn reply" href="./reply.php?note_id=<?php echo $row['note_id']; ?>"></a>
+			<div style="clear:both;"></div>
+		</div>
+	</div>
+	<div id="footer" class="auto">
+		<div class="bottom">
+			<a>BBS</a>
+		</div>
+		<div class="copyright">Powered by Dev_liang ©2018 blog.csdn.net/qq_34804120</div>
+	</div>
+</body>
+<script type="text/javascript">
+	function confirmDel() 
+	{ 
+		if(confirm('确定要删除回帖吗?')) 
+		{ 
+			return true; 
+		} 
+			return false; 
+	} 
+</script>
+</html>
